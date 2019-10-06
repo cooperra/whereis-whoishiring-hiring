@@ -71,12 +71,12 @@ def month_to_number(month):
 
 def extract_jobs_from_page(s):
     extracted_jobs_and_hn_ids = []
-    posts = s.find('table').findAll('tr')[3].findAll('table')[1].findAll('tr', recursive=False)
+    posts = s.find('table').findAll('tr')[3].findAll('table')[1].findAll('tr', class_='comtr', recursive=False)
     for post in posts:
         content = post.find('tr')
         # check the post is not a reply
         if content.find(lambda tag : tag.name == 'img' and int(tag['width']) == 0):
-            html_post = content.find('span', class_ = 'comment')
+            html_post = content.find('div', class_ = 'comment')
             plain_text = html_post.get_text()
             try:
                 hn_id = content.findAll('a')[2]['href'].split('=')[1]

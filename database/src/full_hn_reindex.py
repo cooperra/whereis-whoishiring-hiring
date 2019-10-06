@@ -43,7 +43,7 @@ def process_page(page_id, update=False, localPage=None):
         return # not a monthly who is hiring thread, skip it
     if update:
         delete_jobs(month, year)
-    jobs = extract_jobs_from_page(s)
+    jobs = extract_jobs_from_thread(s)
     save_city_given_list_of_posts(jobs, month, year)
 
 
@@ -67,6 +67,22 @@ def extract_month_and_year(s):
 def month_to_number(month):
     months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     return months.index(month) + 1
+
+
+def extract_jobs_from_thread(s):
+    extracted_jobs_and_hn_ids = []
+    # start with the first page of the thread
+    while True:
+        extracted_jobs_and_hn_ids += extract_jobs_from_page(s)
+        # check whether there are more pages of this thread to process
+        morelink = s.find('a', class_='morelink')
+        if morelink:
+            # follow the morelink and repeat
+            r = requests.get('https://news.ycombinator.com/{}'.format(morelink['href']))
+            s = bs(r.text)
+        else:
+            break
+    return extracted_jobs_and_hn_ids
 
 
 def extract_jobs_from_page(s):
